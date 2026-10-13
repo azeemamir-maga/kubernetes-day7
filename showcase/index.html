@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#07111f">
+
+  <title>Kubernetes Day 7 | Azeem Amir</title>
+
+  <meta name="description"
+        content="Azeem Amir's hands-on Kubernetes Day 7 project showcasing ConfigMaps, Secrets, Deployments, Services, and production-oriented configuration management.">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/script.js" defer></script>
+</head>
+
+<body>
+
+<header class="navbar">
+  <a class="brand" href="#home">K8S-Day-7-Pratical<span>.</span></a>
+
+  <nav>
+    <a href="#overview">Overview</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#implementation">Implementation</a>
+    <a href="#about">About</a>
+  </nav>
+
+  <a class="nav-cta" href="#contact">Connect ↗</a>
+</header>
+
+<main>
+
+<section class="hero" id="home">
+  <div class="hero-content">
+    <p class="eyebrow">
+      <span class="pulse"></span>
+      HANDS-ON DEVOPS PROJECT · DAY 07
+    </p>
+
+    <h1>
+      Configuration<br>
+      without the <span class="gradient">chaos.</span>
+    </h1>
+
+    <p class="hero-description">
+      Exploring Kubernetes ConfigMaps and Secrets to separate application
+      configuration from container images and build more maintainable,
+      production-oriented deployments.
+    </p>
+
+    <div class="hero-buttons">
+      <a class="button primary" href="#architecture">
+        Explore Architecture ↘
+      </a>
+
+      <a class="button secondary" href="#implementation">
+        View Implementation
+      </a>
+    </div>
+
+    <div class="hero-meta">
+      <span>◉ Kubernetes</span>
+      <span>◉ Minikube</span>
+      <span>◉ NGINX</span>
+      <span>◉ Configuration Management</span>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="orbit orbit-one"></div>
+    <div class="orbit orbit-two"></div>
+
+    <div class="floating-card config-card">
+      <span class="card-icon">⚙</span>
+      <div>
+        <strong>ConfigMap</strong>
+        <small>Application configuration</small>
+      </div>
+      <span class="status-dot"></span>
+    </div>
+
+    <div class="central-node">
+      <div class="kube-icon">K8s</div>
+      <h3>Kubernetes</h3>
+      <p>Configuration layer</p>
+      <span class="node-status">● LAB ACTIVE</span>
+    </div>
+
+    <div class="floating-card secret-card">
+      <span class="card-icon">◇</span>
+      <div>
+        <strong>Secret</strong>
+        <small>Sensitive configuration</small>
+      </div>
+      <span class="status-dot"></span>
+    </div>
+
+    <div class="floating-card pod-card">
+      <span class="card-icon">▣</span>
+      <div>
+        <strong>NGINX × 2</strong>
+        <small>Deployment replicas</small>
+      </div>
+      <span class="status-dot"></span>
+    </div>
+  </div>
+</section>
+
+<section class="stats" id="overview">
+  <div class="stat">
+    <span class="stat-number" data-count="2">0</span>
+    <span class="stat-label">Running replicas at verification</span>
+  </div>
+
+  <div class="stat">
+    <span class="stat-number" data-count="3">0</span>
+    <span class="stat-label">ConfigMap keys</span>
+  </div>
+
+  <div class="stat">
+    <span class="stat-number" data-count="2">0</span>
+    <span class="stat-label">Secret keys</span>
+  </div>
+
+  <div class="stat">
+    <span class="stat-number" data-count="1">0</span>
+    <span class="stat-label">ClusterIP service</span>
+  </div>
+</section>
+
+<section class="section" id="architecture">
+  <div class="section-heading">
+    <p class="eyebrow">01 / SYSTEM DESIGN</p>
+    <h2>Inside the architecture.</h2>
+    <p>
+      Follow the configuration flow from Kubernetes resources to the
+      application containers.
+    </p>
+  </div>
+
+  <div class="architecture">
+    <div class="arch-source">
+      <article class="arch-card">
+        <span class="arch-icon">⚙</span>
+        <h3>ConfigMap</h3>
+        <p>app-config</p>
+        <div class="tag-row">
+          <span>APP_ENV</span>
+          <span>LOG_LEVEL</span>
+          <span>APP_PORT</span>
+        </div>
+      </article>
+
+      <article class="arch-card">
+        <span class="arch-icon">◇</span>
+        <h3>Secret</h3>
+        <p>db-credentials</p>
+        <div class="tag-row">
+          <span>username</span>
+          <span>password</span>
+        </div>
+        <small class="security-note">
+          Password values are not displayed.
+        </small>
+      </article>
+    </div>
+
+    <div class="flow-arrow">
+      <span>Configuration injection</span>
+      <strong>↓</strong>
+    </div>
+
+    <article class="arch-card deployment-card">
+      <span class="eyebrow">KUBERNETES DEPLOYMENT</span>
+      <h3>day7-web</h3>
+      <p>Namespace: day7-lab</p>
+
+      <div class="replicas">
+        <div class="replica">
+          <span class="status-dot"></span>
+          <strong>NGINX Pod 01</strong>
+          <small>10.244.0.139</small>
+        </div>
+
+        <div class="replica">
+          <span class="status-dot"></span>
+          <strong>NGINX Pod 02</strong>
+          <small>10.244.0.140</small>
+        </div>
+      </div>
+
+      <p class="architecture-note">
+        Pod IPs are from the captured lab output and can change after recreation.
+      </p>
+    </article>
+
+    <div class="flow-arrow">
+      <span>Internal application access</span>
+      <strong>↓</strong>
+    </div>
+
+    <article class="arch-card service-card">
+      <span class="arch-icon">⇄</span>
+      <h3>day7-web-service</h3>
+      <p>ClusterIP · Port 80</p>
+      <span class="service-ip">10.107.40.238</span>
+    </article>
+  </div>
+
+  <p class="architecture-caption">
+    Configuration is injected into the pods through environment variables.
+    The ClusterIP Service provides internal networking to the selected pods.
+  </p>
+</section>
+
+<section class="section alternate" id="implementation">
+  <div class="section-heading">
+    <p class="eyebrow">02 / HANDS-ON IMPLEMENTATION</p>
+    <h2>Built in the terminal.</h2>
+    <p>
+      Actual resources created and tested in the local Minikube cluster.
+    </p>
+  </div>
+
+  <div class="implementation-grid">
+    <article class="feature-card">
+      <span class="feature-number">01</span>
+      <h3>Configuration management</h3>
+      <p>
+        Created app-config with APP_ENV, LOG_LEVEL and APP_PORT using
+        kubectl create configmap.
+      </p>
+      <span class="feature-tag">CONFIGMAP</span>
+    </article>
+
+    <article class="feature-card">
+      <span class="feature-number">02</span>
+      <h3>Secret management</h3>
+      <p>
+        Created db-credentials with username and password keys.
+        Verified metadata without printing the credential values.
+      </p>
+      <span class="feature-tag">SECRET</span>
+    </article>
+
+    <article class="feature-card">
+      <span class="feature-number">03</span>
+      <h3>Deployment and probes</h3>
+      <p>
+        Deployed two NGINX replicas with readiness probes, CPU requests,
+        and memory limits.
+      </p>
+      <span class="feature-tag">DEPLOYMENT</span>
+    </article>
+
+    <article class="feature-card">
+      <span class="feature-number">04</span>
+      <h3>Runtime verification</h3>
+      <p>
+        Verified APP_ENV, LOG_LEVEL, DB_USERNAME, and the presence of
+        DB_PASSWORD inside a running container.
+      </p>
+      <span class="feature-tag">KUBECTL EXEC</span>
+    </article>
+
+    <article class="feature-card">
+      <span class="feature-number">05</span>
+      <h3>Internal networking</h3>
+      <p>
+        Created a ClusterIP Service and verified that its EndpointSlice
+        contained both pod IP addresses.
+      </p>
+      <span class="feature-tag">SERVICE</span>
+    </article>
+
+    <article class="feature-card">
+      <span class="feature-number">06</span>
+      <h3>Browser access</h3>
+      <p>
+        Forwarded local port 8087 to port 80 of the Kubernetes Service
+        for browser-based verification.
+      </p>
+      <span class="feature-tag">PORT-FORWARD</span>
+    </article>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-heading">
+    <p class="eyebrow">03 / COMMAND LINE</p>
+    <h2>Proof of implementation.</h2>
+    <p>Representative commands from the Day 7 lab.</p>
+  </div>
+
+  <div class="terminal">
+    <div class="terminal-header">
+      <div class="terminal-dots"><i></i><i></i><i></i></div>
+      <span>azeem@kubernetes-day7: ~/kubernetes-day7</span>
+      <button id="copy-command" type="button">Copy command</button>
+    </div>
+
+    <pre><code id="terminal-command"><span class="terminal-muted"># Inspect the Day 7 resources</span>
+kubectl get deployments,pods,services -n day7-lab
+
+<span class="terminal-muted"># Verify application configuration</span>
+kubectl exec deployment/day7-web -n day7-lab -- printenv APP_ENV
+
+<span class="terminal-muted"># Inspect service endpoints</span>
+kubectl get endpointslice -n day7-lab
+
+<span class="terminal-muted"># Open the service locally</span>
+kubectl port-forward -n day7-lab service/day7-web-service 8087:80</code></pre>
+  </div>
+</section>
+
+<section class="section security-section">
+  <div class="security-panel">
+    <div>
+      <p class="eyebrow">04 / SECURITY BY DESIGN</p>
+      <h2>Secrets require real security controls.</h2>
+      <p>
+        Kubernetes Secret data is Base64-encoded by default, not automatically
+        encrypted. Production environments need appropriate encryption at rest,
+        least-privilege RBAC, restricted access, and credential rotation.
+      </p>
+    </div>
+
+    <div class="security-checks">
+      <span>✓ Avoid committing credentials to Git</span>
+      <span>✓ Apply least-privilege RBAC</span>
+      <span>✓ Configure encryption at rest</span>
+      <span>✓ Consider external secret managers</span>
+    </div>
+  </div>
+</section>
+
+<section class="section about-section" id="about">
+  <div class="about-card">
+    <div class="avatar">AA</div>
+
+    <div>
+      <p class="eyebrow">THE ENGINEER BEHIND THE LAB</p>
+      <h2>Azeem Amir</h2>
+      <p class="role">
+        DevOps Engineer · Cloud & Automation Enthusiast
+      </p>
+      <p>
+        Building practical skills in containerization, Kubernetes,
+        Linux administration, automation, CI/CD, and cloud technologies
+        through hands-on projects.
+      </p>
+
+      <div class="skill-list">
+        <span>Kubernetes</span>
+        <span>Docker</span>
+        <span>Linux</span>
+        <span>Git & GitHub</span>
+        <span>CI/CD</span>
+        <span>Cloud</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="contact" id="contact">
+  <p class="eyebrow">LET'S CONNECT</p>
+  <h2>Building. Testing. Improving.</h2>
+  <p>
+    Open to junior DevOps opportunities, practical collaborations,
+    and container deployment projects.
+  </p>
+
+  <div class="hero-buttons">
+    <a class="button primary"
+       href="https://github.com/azeemamir-maga"
+       target="_blank" rel="noopener noreferrer">
+      Explore GitHub ↗
+    </a>
+
+    <a class="button secondary"
+       href="https://www.linkedin.com/in/azeem-aamir-600b78341/"
+       target="_blank" rel="noopener noreferrer">
+      Connect on LinkedIn ↗
+    </a>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <span>© <span id="year"></span> Azeem Amir</span>
+  <span>Kubernetes Day 7 · ConfigMaps & Secrets</span>
+  <a href="#home">Back to top ↑</a>
+</footer>
+
+</body>
+</html>
